@@ -1,16 +1,69 @@
 import cv2
 import numpy as np
 
+
+def find_min_resolution(cam):
+    """Find the minimum supported resolution for the camera"""
+    print("=== BUSCANDO RESOLUCIÓN MÍNIMA ===")
+
+    # Test common low resolutions
+    test_resolutions = [
+        (160, 120),
+        (176, 144),
+        (320, 240),
+        (352, 288),
+        (640, 480),
+        (800, 600),
+        (1024, 768),
+    ]
+
+    min_resolution = None
+
+    for w, h in test_resolutions:
+        # Try to set resolution
+        cam.set(cv2.CAP_PROP_FRAME_WIDTH, w)
+        cam.set(cv2.CAP_PROP_FRAME_HEIGHT, h)
+
+        # Check if setting was successful
+        actual_w = int(cam.get(cv2.CAP_PROP_FRAME_WIDTH))
+        actual_h = int(cam.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+        if actual_w == w and actual_h == h:
+            print(f"✓ {w}x{h} - Soportada")
+            if min_resolution is None:
+                min_resolution = (w, h)
+        else:
+            print(f"✗ {w}x{h} - No soportada (obtuvo {actual_w}x{actual_h})")
+
+    if min_resolution:
+        print(
+            f"\n🎯 Resolución mínima encontrada: {min_resolution[0]}x{min_resolution[1]}"
+        )
+        # Set to minimum resolution
+        cam.set(cv2.CAP_PROP_FRAME_WIDTH, min_resolution[0])
+        cam.set(cv2.CAP_PROP_FRAME_HEIGHT, min_resolution[1])
+    else:
+        print("⚠️ No se pudo determinar resolución mínima")
+
+    print("=" * 40)
+    return min_resolution
+
+
 cam = cv2.VideoCapture(2)
 if not cam.isOpened():
     print("Error: No se pudo acceder a la cámara.")
     exit()
 
+# Find minimum resolution
+min_res = find_min_resolution(cam)
+
 print("=== ANÁLISIS DE CÁMARA ===")
 w, h = int(cam.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cam.get(cv2.CAP_PROP_FRAME_HEIGHT))
 print(
-    f"Resolución: {w}x{h} | FPS: {cam.get(cv2.CAP_PROP_FPS):.0f} | Backend: {cam.getBackendName()}"
+    f"Resolución actual: {w}x{h} | FPS: {cam.get(cv2.CAP_PROP_FPS):.0f} | Backend: {cam.getBackendName()}"
 )
+if min_res:
+    print(f"Resolución mínima: {min_res[0]}x{min_res[1]}")
 print("=" * 30)
 print("R: análisis | ESC: salir")
 
