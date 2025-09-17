@@ -27,6 +27,11 @@ if cap.isOpened():
     print(f"Initial gain: {current_gain}")
     print(f"Initial exposure: {current_exposure}")
 
+    # Create fullscreen window (independent of camera resolution)
+    window_name = "Logitech C922 - Full Control"
+    cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+    cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+
     while True:
         ret, frame = cap.read()
         if not ret:
@@ -72,7 +77,7 @@ if cap.isOpened():
             1,
         )
 
-        cv2.imshow("Logitech C922 - Full Control", frame)
+        cv2.imshow(window_name, frame)
 
         key = cv2.waitKey(1) & 0xFF
 
